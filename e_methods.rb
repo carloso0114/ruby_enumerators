@@ -1,4 +1,6 @@
 # rubocop:disable Style/CaseEquality
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/PerceivedComplexity
 module Enumerable
   def my_each
     return to_enum(:my_each) unless block_given?
@@ -25,7 +27,10 @@ module Enumerable
   def my_select
     return to_enum(:my_select) unless block_given?
 
-    if is_a?(Array || Range)
+    if is_a?(Array)
+      result = []
+      my_each { |value| result.push(value) if yield(value) }
+    elsif is_a?(Range)
       result = []
       my_each { |value| result.push(value) if yield(value) }
     else
@@ -35,31 +40,62 @@ module Enumerable
     result
   end
 
-  def my_all?
-    if block_given?
+  def my_all?(argum = nil)
+    if block_given? && !argum.nil?
+      puts 'warning: given block not used'
+      my_each { |element| return false unless element.is_a? argum }
+    elsif block_given?
       my_each { |element| return false unless yield(element) }
+    elsif argum.nil?
+      my_each { |element| return false if element.nil? || element == false }
+    elsif !argum.nil? && (argum.is_a? Class)
+      my_each { |element| return false unless element.is_a? argum }
+    elsif !argum.nil? && argum.instance_of?(Regexp)
+      my_each { |element| return false unless argum.match(element) }
     else
       my_each { |element| return false unless element }
     end
     true
   end
 
-  def my_any?
-    if block_given?
+  def my_any?(argum = nil)
+    if block_given? && !argum.nil?
+      puts 'warning: given block not used'
+      my_each { |element| return true if element.is_a? argum }
+    elsif block_given?
       my_each { |element| return true if yield(element) == true }
+    elsif argum.nil?
+      my_each { |element| return true if element.nil? || element == false }
+    elsif !argum.nil? && (argum.is_a? Class)
+      my_each { |element| return true if element.is_a? argum }
+    elsif !argum.nil? && argum.instance_of?(Regexp)
+      my_each { |element| return true if argum.match(element) }
+    elsif argum
+      my_each { |element| return true if element == argum }
     else
       my_each { |element| return true if element }
     end
     false
   end
 
-  def my_none?
-    if block_given?
-      my_each { |element| return false if yield(element) == true }
+  def my_none?(argum = nil)
+    if block_given? && !argum.nil?
+      puts 'warning: given block not used'
+      my_each { |element| return true unless element.is_a? argum }
+    elsif block_given?
+      my_each { |element| return true unless yield(element) == true }
+    elsif argum.nil?
+      my_each { |element| return true if element.nil? || element == false }
+    elsif !argum.nil? && (argum.is_a? Class) # >-
+      my_each { |element| return true unless element.is_a? argum }
+    elsif !argum.nil? && argum.instance_of?(Regexp)
+      my_each { |element| return true unless argum.match(element) }
+    elsif argum
+      my_each { |element| return true unless element == argum }
     else
-      my_each { |element| return false if element }
+      my_each { |element| return true unless element }
     end
-    true
+    false
   end
 
   def my_count(argum = nil)
@@ -117,3 +153,5 @@ def multiply_els(ar)
 end
 
 # rubocop:enable Style/CaseEquality
+# rubocop:enable Metrics/CyclomaticComplexity
+# rubocop:enable Metrics/PerceivedComplexity
