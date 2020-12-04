@@ -1,4 +1,3 @@
-# rubocop:disable Style/CaseEquality
 # rubocop:disable Metrics/CyclomaticComplexity
 # rubocop:disable Metrics/PerceivedComplexity
 # rubocop:disable Metrics/ModuleLength
@@ -114,6 +113,7 @@ module Enumerable
 
   def my_map(proc = nil)
     return to_enum(:my_map) unless block_given? || !proc.nil?
+
     new_arr = []
     if proc.nil?
       to_a.my_each { |i| new_arr.push(yield(i)) }
@@ -122,39 +122,32 @@ module Enumerable
     new_arr
   end
 
-  def my_inject(argum = nil)
-    memo = if !argum.nil?
-             argum
-           else
-             first - first
-           end
-    my_each do |element|
-      puts memo
-      memo = yield(memo, element)
-    end
+  def my_inject (argum = nil ,sym = nil)
+    if !block_given?
+      if argum && sym
+        "puts you gave me argum and sym"
+        memo = argum
+        to_a.my_each do |element| memo = memo.send(sym, element) end
+        elsif argum
+        puts "you only gave me one symbol"
+        memo = first 
+        to_a[1..to_a.length].my_each do |element| memo = memo.send(argum, element) end
+      end
+    elsif block_given? && argum
+      puts "you gave me a block and and argum"
+      memo = argum
+      my_each { |element| memo = yield(memo, element) }
+    else
+      memo = first
+      to_a[1..to_a.length].my_each { |element| memo = yield(memo, element) }
+      memo
+    end #end of !block_given  
     memo
-  end
+  end # End of my_inject 
 
-  # Method to multiply elements
-  def my_inject1(argum = 1)
-    memo = if !argum.nil?
-             argum
-           else
-             first - first
-           end
-    my_each do |element|
-      puts memo
-      memo = yield(memo, element)
-    end
-    memo
-  end
+# End of module 
 end
 
-def multiply_els(arr)
-  arr.my_inject1 { |memo, n| memo * n }
-end
-
-# rubocop:enable Style/CaseEquality
 # rubocop:enable Metrics/CyclomaticComplexity
 # rubocop:enable Metrics/PerceivedComplexity
 # rubocop:enable Metrics/ModuleLength
