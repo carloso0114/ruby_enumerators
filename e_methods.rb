@@ -1,7 +1,7 @@
 # rubocop:disable Metrics/CyclomaticComplexity
 # rubocop:disable Metrics/PerceivedComplexity
 # rubocop:disable Metrics/ModuleLength
-
+# rubocop:disable Style/CaseEquality
 module Enumerable
   def my_each
     return to_enum(:my_each) unless block_given?
@@ -111,43 +111,45 @@ module Enumerable
     counter
   end
 
-  def my_map(proc = nil)
-    return to_enum(:my_map) unless block_given? || !proc.nil?
+  def my_map(prc = nil)
+    return to_enum(:my_map) unless block_given? || !prc.nil?
 
     new_arr = []
-    if proc.nil?
+    if !prc.nil?
+      to_a.my_each { |i| new_arr.push(prc.call(i)) }
+    else
       to_a.my_each { |i| new_arr.push(yield(i)) }
-    else to_a.my_each { |i| new_arr.push(proc.call(i)) }
     end
     new_arr
   end
 
-  def my_inject (argum = nil ,sym = nil)
+  def my_inject(argum = nil, sym = nil)
     if !block_given?
       if argum && sym
-        "puts you gave me argum and sym"
         memo = argum
-        to_a.my_each do |element| memo = memo.send(sym, element) end
-        elsif argum
-        puts "you only gave me one symbol"
-        memo = first 
-        to_a[1..to_a.length].my_each do |element| memo = memo.send(argum, element) end
+        to_a.my_each { |element| memo = memo.send(sym, element) }
+      elsif argum
+        memo = first
+        to_a[1..to_a.length].my_each { |element| memo = memo.send(argum, element) }
       end
     elsif block_given? && argum
-      puts "you gave me a block and and argum"
       memo = argum
       my_each { |element| memo = yield(memo, element) }
     else
       memo = first
       to_a[1..to_a.length].my_each { |element| memo = yield(memo, element) }
       memo
-    end #end of !block_given  
+    end
     memo
-  end # End of my_inject 
+  end
+  # End of module
+end
 
-# End of module 
+def multiply_els(arr)
+  arr.my_inject { |memo, n| memo * n }
 end
 
 # rubocop:enable Metrics/CyclomaticComplexity
 # rubocop:enable Metrics/PerceivedComplexity
 # rubocop:enable Metrics/ModuleLength
+# rubocop:enable Style/CaseEquality
