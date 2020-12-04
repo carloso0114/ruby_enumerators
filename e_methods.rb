@@ -48,7 +48,7 @@ module Enumerable
     elsif block_given?
       my_each { |element| return false unless yield(element) }
     elsif argum.nil?
-      my_each { |element| return false if element.nil? || element == false }
+      my_each { |element| return false if element.nil? || element === false }
     elsif !argum.nil? && (argum.is_a? Class)
       my_each { |element| return false unless element.is_a? argum }
     elsif !argum.nil? && argum.instance_of?(Regexp)
