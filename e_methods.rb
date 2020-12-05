@@ -1,6 +1,7 @@
 # rubocop:disable Metrics/CyclomaticComplexity
 # rubocop:disable Metrics/PerceivedComplexity
 # rubocop:disable Metrics/ModuleLength
+# rubocop:disable Metrics/MethodLength
 # rubocop:disable Style/CaseEquality
 module Enumerable
   def my_each
@@ -53,6 +54,8 @@ module Enumerable
       my_each { |element| return false unless element.is_a? argum }
     elsif !argum.nil? && argum.instance_of?(Regexp)
       my_each { |element| return false unless argum.match(element) }
+    elsif !argum.nil?
+      my_each { |element| return false unless element == argum }
     else
       my_each { |element| return false unless element }
     end
@@ -60,15 +63,19 @@ module Enumerable
   end
 
   def my_any?(argum = nil)
-    if block_given? && !argum.nil?
+    if block_given? && !argum.nil? && argum.instance_of?(Regexp)
+      puts 'warning: given block not used'
+      my_each { |element| return true if argum.match(element) }
+    elsif !argum.nil? && (argum.is_a? Class)
       puts 'warning: given block not used'
       my_each { |element| return true if element.is_a? argum }
+    elsif block_given? && !argum.nil?
+      puts 'warning: given block not used'
+      my_each { |element| return true if element == argum }
     elsif block_given?
-      my_each { |element| return true if yield(element) == true }
+      my_each { |element| return true if yield(element) }
     elsif argum.nil?
       my_each { |element| return true if element.nil? || element == false }
-    elsif !argum.nil? && (argum.is_a? Class)
-      my_each { |element| return true if element.is_a? argum }
     elsif !argum.nil? && argum.instance_of?(Regexp)
       my_each { |element| return true if argum.match(element) }
     elsif argum
@@ -83,16 +90,20 @@ module Enumerable
     if block_given? && !argum.nil?
       puts 'warning: given block not used'
       my_each { |element| return true unless element.is_a? argum }
+    elsif is_a?(Range) && block_given?
+      to_a.my_each { |element| return true if yield(element) == false }
     elsif block_given?
-      my_each { |element| return true unless yield(element) == true }
+      to_a.my_each { |element| return true unless yield(element) == true }
     elsif argum.nil?
-      my_each { |element| return true if element.nil? || element == false }
-    elsif !argum.nil? && (argum.is_a? Class) # >-
+      my_each { |element| return false if element == true }
+      my_each { |element| return true if element == false }
+    elsif !argum.nil? && (argum.is_a? Class)
       my_each { |element| return true unless element.is_a? argum }
     elsif !argum.nil? && argum.instance_of?(Regexp)
       my_each { |element| return true unless argum.match(element) }
     elsif argum
-      my_each { |element| return true unless element == argum }
+      my_each { |element| return false if element == argum }
+      my_each { |element| return true if element != argum }
     else
       my_each { |element| return true unless element }
     end
@@ -124,6 +135,7 @@ module Enumerable
   end
 
   def my_inject(argum = nil, sym = nil)
+    return 'LocalJumpError (block not given)' if !block_given? && !argum
     if !block_given?
       if argum && sym
         memo = argum
@@ -152,4 +164,5 @@ end
 # rubocop:enable Metrics/CyclomaticComplexity
 # rubocop:enable Metrics/PerceivedComplexity
 # rubocop:enable Metrics/ModuleLength
+# rubocop:enable Metrics/MethodLength
 # rubocop:enable Style/CaseEquality
