@@ -136,6 +136,7 @@ module Enumerable
 
   def my_inject(argum = nil, sym = nil)
     return 'LocalJumpError (block not given)' if !block_given? && !argum
+    
     if !block_given?
       if argum && sym
         memo = argum
