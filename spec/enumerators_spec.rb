@@ -130,7 +130,7 @@ describe Enumerable do
 
     context 'block is given and argum is nil' do
       it "return the number of elements for which the block's true" do
-        expect(arr.my_count { |n| n % 2 == 0 }).to eql(2)
+        expect(arr.my_count { |n| n.even? }).to eql(2)
       end
     end
   end
