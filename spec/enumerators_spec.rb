@@ -116,18 +116,64 @@ describe Enumerable do
   end
 
   describe "#my_count" do
+    context "block is not given and argum is nil" do
+      it "returns the number of elements" do
+        expect(arr.my_count).to eql(4)
+      end
+    end
 
+    context "block is not given and argum is not nil" do
+      it "returns the number of elements equal to argum" do
+        expect(arr.my_count(4)).to eql(1)
+      end
+    end
+
+    context "block is given and argum is nil" do
+      it "returns the number of elements for which the block's true" do
+        expect(arr.my_count { |n| n % 2 == 0 }).to eql(2)
+      end
+    end
   end
 
   describe "#my_map" do
+    it "returns an enumerator if no block is given" do
+      expect(arr2.my_map.is_a?(Enumerator)).to eql(true)
+    end
 
+    it "returns a new array with the values returned by block" do
+      expect(arr2.my_map { |el| el.length > 3 }).to eql([true, false, true])
+    end
   end
 
   describe "#my_inject" do
+    context "block not given and symbol is given" do
+      it "if argum is not nil, return value according to the expected operation (symbol) starting at argum" do
+        expect(arr.my_inject(1, :+)).to eql(11)
+      end
+    end
 
+    context "block not given and symbol is given" do
+      it "if argum is nil, return value according to the expected operation (symbol)" do
+        expect(arr.my_inject(:+)).to eql(10)
+      end
+    end
+
+    context "block given and argum is not nil" do
+      it "return value according to the expected operation (symbol) starting at argum" do
+        expect(arr.my_inject(1) { |sum, n| sum + n }).to eql(11)
+      end
+    end
+
+    context "block given and argum is nil" do
+      it "return value according to the expected operation (symbol)" do
+        expect(arr.my_inject { |sum, n| sum + n }).to eql(10)
+      end
+    end
   end
 
   describe "#multiply_els" do
-
+    it "return product of the elements" do
+      expect(multiply_els(ra)).to eql(0)
+    end
   end
 end
