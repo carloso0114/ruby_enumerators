@@ -66,12 +66,11 @@ module Enumerable
     if block_given? && !argum.nil? && argum.instance_of?(Regexp)
       puts 'warning: given block not used'
       my_each { |element| return true if argum.match(element) }
+    elsif !block_given? && argum.nil?
+      my_each { |element| return true unless element.nil? || element == false }
     elsif !argum.nil? && (argum.is_a? Class)
       puts 'warning: given block not used'
       my_each { |element| return true if element.is_a? argum }
-    elsif block_given? && !argum.nil?
-      puts 'warning: given block not used'
-      my_each { |element| return true if element == argum }
     elsif block_given?
       my_each { |element| return true if yield(element) }
     elsif argum.nil?
